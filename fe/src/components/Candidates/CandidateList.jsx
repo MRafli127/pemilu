@@ -1,4 +1,3 @@
-// components/Candidates/CandidateList.jsx
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import CandidateCard from './CandidateCard';
@@ -13,9 +12,27 @@ const CandidateList = () => {
   const navigate = useNavigate();
 
   const candidates = [
-    { id: 1, name: "Candidate 1", image: candidate1Image },
-    { id: 2, name: "Candidate 2", image: candidate2Image },
-    { id: 3, name: "Candidate 3", image: candidate3Image },
+    {
+      id: 1,
+      name: "Candidate 1",
+      image: candidate1Image,
+      visionMission:
+        "Mewujudkan perubahan menuju Indonesia adil dan makmur melalui pendidikan berkualitas, ekonomi berkeadilan, dan pemerintahan bersih.",
+    },
+    {
+      id: 2,
+      name: "Candidate 2",
+      image: candidate2Image,
+      visionMission:
+        "Meneruskan pembangunan nasional untuk Indonesia Maju dengan prioritas ketahanan pangan, digitalisasi, dan stabilitas nasional.",
+    },
+    {
+      id: 3,
+      name: "Candidate 3",
+      image: candidate3Image,
+      visionMission:
+        "Membangun Indonesia dari desa, memperkuat demokrasi, memperluas layanan kesehatan dan pendidikan berkualitas untuk seluruh rakyat.",
+    },
   ];
 
   const handleSelectCandidate = (candidateId) => {
@@ -30,8 +47,6 @@ const CandidateList = () => {
 
   return (
     <div className="p-6">
-
-      {/* Grid Lebar Terkontrol */}
       <div className="flex flex-wrap justify-center gap-8">
         {candidates.map(candidate => (
           <CandidateCard

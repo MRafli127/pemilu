@@ -1,4 +1,3 @@
-// components/Candidates/CandidateCard.jsx
 const CandidateCard = ({ candidate, active = false, onClick }) => {
   return (
     <div
@@ -7,13 +6,12 @@ const CandidateCard = ({ candidate, active = false, onClick }) => {
         active ? 'ring-4 ring-red-500' : ''
       } w-full max-w-[350px] mx-auto`}
     >
-      <h3 className="text-xl font-bold text-center mb-4">Candidate {candidate.id}</h3>
+      <h3 className="text-xl font-bold text-center mb-4">{candidate.name}</h3>
 
-      {/* Gambar kotak */}
       <div className="w-full aspect-square overflow-hidden rounded-lg mb-4">
         <img
           src={candidate.image}
-          alt={`Candidate ${candidate.id}`}
+          alt={candidate.name}
           className="w-full h-full object-cover"
         />
       </div>
@@ -22,8 +20,7 @@ const CandidateCard = ({ candidate, active = false, onClick }) => {
 
       {active && (
         <p className="text-sm text-center text-gray-700">
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor
-          incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam...
+          {candidate.visionMission}
         </p>
       )}
     </div>
