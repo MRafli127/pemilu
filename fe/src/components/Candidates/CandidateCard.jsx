@@ -6,7 +6,8 @@ const CandidateCard = ({ candidate, active = false, onClick }) => {
         active ? 'ring-4 ring-red-500' : ''
       } w-full max-w-[350px] mx-auto`}
     >
-      <h3 className="text-xl font-bold text-center mb-4">{candidate.name}</h3>
+      <h3 className="text-xl font-bold text-center mb-4 text-black">{candidate.name}</h3>
+
 
       <div className="w-full aspect-square overflow-hidden rounded-lg mb-4">
         <img
