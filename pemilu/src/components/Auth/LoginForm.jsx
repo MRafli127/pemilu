@@ -5,6 +5,8 @@ import Button from '../UI/Button';
 import InputField from '../UI/InputField';
 import { useAuth } from '../../context/AuthContext';
 
+import axios from 'axios';
+
 const LoginForm = () => {
   const [formData, setFormData] = useState({
     email: '',
@@ -18,11 +20,33 @@ const LoginForm = () => {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e) => {
+ const handleSubmit = async (e) => {
     e.preventDefault();
-    login({ email: formData.email });
-    navigate('/candidates');
+
+    try {
+      const response = await axios.post(
+      `https://finpro-sbd-backend.vercel.app/voter/login?email=${encodeURIComponent(formData.email)}&password=${encodeURIComponent(formData.password)}`
+    );
+
+      const { payload, token } = response.data;
+
+      if (payload) {
+        login({ user: payload, token });
+        
+        localStorage.setItem('user', JSON.stringify({ user: payload, token }));
+
+        navigate('/candidates');
+      } else {
+        console.log('Invalid email or password');
+      }
+    } catch (err) {
+      console.error(err);
+      console.log('An error occurred while logging in. Please try again.');
+    }
   };
+
+
+
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">

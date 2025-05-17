@@ -1,14 +1,17 @@
-// components/Auth/RegisterForm.jsx
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import Button from '../UI/Button';
 import InputField from '../UI/InputField';
 import { useAuth } from '../../context/AuthContext';
 
+import axios from 'axios';
+
 const RegisterForm = () => {
   const [formData, setFormData] = useState({
     region: '',
-    nik: '',
+    name : '',
+    age: '',
+    status: '',
     email: '',
     password: '',
     confirmPassword: ''
@@ -21,11 +24,32 @@ const RegisterForm = () => {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    login({ email: formData.email });
-    navigate('/candidates');
-  };
+  const handleSubmit = async (e) => {
+  e.preventDefault();
+
+  // Validate password match
+  if (formData.password !== formData.confirmPassword) {
+    alert('Passwords do not match');
+    return;
+  }
+
+try {
+  const response = await axios.post(
+    `https://finpro-sbd-backend.vercel.app/voter/register?name=${encodeURIComponent(formData.name)}&email=${encodeURIComponent(formData.email)}&password=${encodeURIComponent(formData.password)}&age=${encodeURIComponent(formData.age)}&status=${encodeURIComponent(formData.status)}`
+  );
+
+    if (response.data.success) {
+      alert('Registration successful!');
+      navigate('/login');
+    } else {
+      alert(response.data.message || 'Registration failed');
+    }
+  } catch (error) {
+    console.error('Registration error:', error);
+    alert('An error occurred during registration');
+  }
+};
+
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
@@ -44,15 +68,42 @@ const RegisterForm = () => {
           <option value="region3">Region 3</option>
         </select>
       </div>
-      
+
       <InputField
-        label="NIK"
-        name="nik"
-        placeholder="NIK"
-        value={formData.nik}
+        label="Name"
+        type="text"
+        name="name"
+        placeholder="Enter your name"
+        value={formData.name}
         onChange={handleChange}
         required
       />
+      
+      <InputField
+        label="Age"
+        type="number"
+        name="age"
+        placeholder="Enter your age"
+        value={formData.age}
+        onChange={handleChange}
+        required
+      />
+      
+      <div className="mb-4">
+        <label className="block text-sm font-medium mb-1">Status</label>
+        <select
+          name="status"
+          value={formData.status}
+          onChange={handleChange}
+          className="form-input"
+          required
+        >
+          <option value="">Select Status</option>
+          <option value="Kawin">Kawin</option>
+          <option value="Jomblo">Jomblo</option>
+          <option value="TNI">TNI</option>
+        </select>
+      </div>
       
       <InputField
         label="Email"
