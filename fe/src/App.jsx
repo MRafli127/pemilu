@@ -8,6 +8,7 @@ import VotersPerRegionPage from './pages/VotersPerRegionPage';
 import CountdownPage from './pages/CountdownPage';
 import StartPage from './pages/StartPage';
 import DashboardPage from './pages/DashboardPage';
+import VoteConfirmationPage from './pages/VoteConfirmationPage'; // import halaman konfirmasi
 import { AuthProvider } from './context/AuthContext';
 
 function App() {
@@ -23,6 +24,7 @@ function App() {
           <Route path="/voting-progress" element={<VotingProgressPage />} />
           <Route path="/voters-per-region" element={<VotersPerRegionPage />} />
           <Route path="/countdown" element={<CountdownPage />} />
+          <Route path="/vote-confirmation" element={<VoteConfirmationPage />} /> {/* Route baru */}
         </Routes>
       </Router>
     </AuthProvider>

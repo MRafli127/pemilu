@@ -12,27 +12,27 @@ const CandidateList = () => {
   const navigate = useNavigate();
 
   const candidates = [
-    {
-      id: 1,
-      name: "Candidate 1",
-      image: candidate1Image,
-      visionMission:
-        "Mewujudkan perubahan menuju Indonesia adil dan makmur melalui pendidikan berkualitas, ekonomi berkeadilan, dan pemerintahan bersih.",
-    },
-    {
-      id: 2,
-      name: "Candidate 2",
-      image: candidate2Image,
-      visionMission:
-        "Meneruskan pembangunan nasional untuk Indonesia Maju dengan prioritas ketahanan pangan, digitalisasi, dan stabilitas nasional.",
-    },
-    {
-      id: 3,
-      name: "Candidate 3",
-      image: candidate3Image,
-      visionMission:
-        "Membangun Indonesia dari desa, memperkuat demokrasi, memperluas layanan kesehatan dan pendidikan berkualitas untuk seluruh rakyat.",
-    },
+{
+  id: 1,
+  name: "Anies Baswedan - Muhaimin Iskandar ",
+  image: candidate1Image,
+  visionMission:
+    "Mewujudkan Indonesia maju, berkeadilan, dan sejahtera melalui pemerintahan yang bersih dan berpihak pada rakyat. Meliputi peningkatan kualitas pendidikan yang merata, pengembangan ekonomi rakyat terutama UMKM dan pertanian, serta pemberantasan korupsi dengan transparansi. Mereka juga berkomitmen memperkuat infrastruktur nasional, menjaga persatuan dan keragaman, meningkatkan layanan kesehatan dan sosial, serta menjaga lingkungan hidup secara berkelanjutan demi masa depan Indonesia yang lebih baik."
+},
+{
+  id: 2,
+  name: "Prabowo Subianto - Sandiaga Uno",
+  image: candidate2Image,
+  visionMission:
+    "Meneruskan pembangunan nasional yang berfokus pada kedaulatan pangan, peningkatan sumber daya manusia, percepatan digitalisasi, serta menjaga stabilitas nasional dan keamanan untuk mewujudkan Indonesia yang mandiri dan kuat."
+},
+{
+  id: 3,
+  name: "Ganjar Pranowo - Mahfud MD",
+  image: candidate3Image,
+  visionMission:
+    "Membangun Indonesia dari desa dengan pemberdayaan masyarakat, memperkuat demokrasi dan tata kelola pemerintahan yang bersih, serta memperluas akses layanan kesehatan dan pendidikan berkualitas demi kesejahteraan seluruh rakyat."
+}
   ];
 
   const handleSelectCandidate = (candidateId) => {
@@ -41,7 +41,7 @@ const CandidateList = () => {
 
   const handleVote = () => {
     if (selectedCandidate) {
-      navigate('/voting-progress');
+      navigate('/vote-confirmation'); // arahkan ke halaman konfirmasi vote
     }
   };
 
@@ -61,7 +61,7 @@ const CandidateList = () => {
       <div className="flex justify-center mt-10">
         <Button
           onClick={handleVote}
-          className={`px-10 ${!selectedCandidate ? 'opacity-50 cursor-not-allowed' : ''}`}
+          className={`px-10 bg-red-500 text-white hover:bg-red-600 ${!selectedCandidate ? 'opacity-50 cursor-not-allowed' : ''}`}
           arrow
         >
           Vote
