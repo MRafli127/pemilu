@@ -20,3 +20,8 @@ npm run dev
 ```
 
 ```
+
+## Authors ✍️
+
+| Group 20| Student Number |
+| :----------------: | :------------: |
