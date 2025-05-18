@@ -10,6 +10,7 @@ import StartPage from './pages/StartPage';
 import DashboardPage from './pages/DashboardPage';
 import VoteConfirmationPage from './pages/VoteConfirmationPage'; // import halaman konfirmasi
 import { AuthProvider } from './context/AuthContext';
+import axios from 'axios'
 
 function App() {
   return (
