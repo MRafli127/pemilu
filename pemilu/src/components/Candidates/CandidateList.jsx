@@ -46,56 +46,68 @@ const CandidateList = () => {
   };
 
   const handleVote = async () => {
-    if (!selectedCandidate.id) return;
+  if (!selectedCandidate.id) return;
 
-    setIsLoading(true);
-    setError(null);
+  setIsLoading(true);
+  setError(null);
 
-    try {
-      // Use the frontend index to determine the branch endpoint
-      switch(selectedCandidate.index) {
-        case 1: 
-        response = await api.post(
-        `https://finpro-sbd-backend.vercel.app/branch/add1`,
-        {
-          Voter: user.id,
-          CandidateID: selectedCandidate.id
-        }
-      );
-        break;
-        case 2: 
-        response = await api.post(
-        `https://finpro-sbd-backend.vercel.app/branch/add2`,
-        {
-          Voter: user.id,
-          CandidateID: selectedCandidate.id
-        }
-      );
-        break;
-        case 3: 
-        response = await api.post(
-        `https://finpro-sbd-backend.vercel.app/branch/add3`,
-        {
-          Voter: user.id,
-          CandidateID: selectedCandidate.id
-        }
-      );
-        break;
-        default: 
-      }
+  try {
+    let response;
+    const formData = new URLSearchParams();
+    formData.append('Voter', user.id);
+    formData.append('CandidateID', selectedCandidate.id);
 
-      if (response.payload.success) {
-        navigate('/vote-confirmation');
-      } else {
-        throw new Error(response.payload.message || 'Voting failed');
-      }
-    } catch (error) {
-      console.error('Error submitting vote:', error);
-      setError(error.message || 'Failed to submit vote');
-    } finally {
-      setIsLoading(false);
+    // Use the frontend index to determine the branch endpoint
+    switch(selectedCandidate.index) {
+      case 1: 
+        response = await api.post(
+          `https://finpro-sbd-backend.vercel.app/branch/add1`,
+          formData.toString(),
+          {
+            headers: {
+              'Content-Type': 'application/x-www-form-urlencoded'
+            }
+          }
+        );
+        break;
+      case 2: 
+        response = await api.post(
+          `https://finpro-sbd-backend.vercel.app/branch/add2`,
+          formData.toString(),
+          {
+            headers: {
+              'Content-Type': 'application/x-www-form-urlencoded'
+            }
+          }
+        );
+        break;
+      case 3: 
+        response = await api.post(
+          `https://finpro-sbd-backend.vercel.app/branch/add3`,
+          formData.toString(),
+          {
+            headers: {
+              'Content-Type': 'application/x-www-form-urlencoded'
+            }
+          }
+        );
+        break;
+      default:
+        throw new Error('Invalid candidate index');
     }
-  };
+
+    if (response.data?.success) {  // Changed from response.payload to response.data
+      navigate('/vote-confirmation');
+    } else {
+      throw new Error(response.data?.message || 'Voting failed');
+    }
+  } catch (error) {
+    console.error('Error submitting vote:', error);
+    setError(error.response?.data?.message || error.message || 'Failed to submit vote');
+  } finally {
+    setIsLoading(false);
+  }
+};
 
   return (
     <div className="p-6">
