@@ -28,12 +28,26 @@ const LoginForm = () => {
       `https://finpro-sbd-backend.vercel.app/voter/login?email=${encodeURIComponent(formData.email)}&password=${encodeURIComponent(formData.password)}`
     );
 
-      const { payload, token } = response.data;
+    const { payload, token } = response.data;
 
-      if (payload) {
-        login({ user: payload, token });
-        
-        localStorage.setItem('user', JSON.stringify({ user: payload, token }));
+    if (payload) {
+      login({
+        id: payload.voterid, 
+        name: payload.name,
+        email: payload.email,
+        isadmin: payload.isadmin,
+        region: payload.region,
+        token
+      });
+            
+      localStorage.setItem('user', JSON.stringify({
+        id: payload.voterid,
+        name: payload.name,
+        email: payload.email,
+        isadmin: payload.isadmin,
+        region: payload.region,
+        token
+    }));
 
         navigate('/candidates');
       } else {

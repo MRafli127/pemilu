@@ -45,7 +45,7 @@ const CandidateList = () => {
     setError(null);
   };
 
-  const handleVote = async () => {
+const handleVote = async () => {
     if (!selectedCandidate.id) return;
 
     setIsLoading(true);
@@ -83,15 +83,28 @@ const CandidateList = () => {
         break;
         default: 
       }
+        console.log("Submitting vote:", {
+        Voter: user.id,
+        CandidateID: selectedCandidate.id
+      });
 
-      if (response.payload.success) {
-        navigate('/vote-confirmation');
+
+
+      if (response.data.success) {
+        navigate('/dashboard');
       } else {
-        throw new Error(response.payload.message || 'Voting failed');
+        throw new Error(response.data.message || 'Voting failed');
       }
     } catch (error) {
       console.error('Error submitting vote:', error);
       setError(error.message || 'Failed to submit vote');
+
+  console.log("Submitting vote:", {
+    Voter: user.id,
+    CandidateID: selectedCandidate.id
+  });
+
+  navigate('/dashboard');
     } finally {
       setIsLoading(false);
     }
