@@ -45,7 +45,7 @@ const CandidateList = () => {
     setError(null);
   };
 
-  const handleVote = async () => {
+const handleVote = async () => {
   if (!selectedCandidate.id) return;
 
   setIsLoading(true);
@@ -92,22 +92,34 @@ const CandidateList = () => {
           }
         );
         break;
-      default:
-        throw new Error('Invalid candidate index');
-    }
+        default: 
+      }
+        console.log("Submitting vote:", {
+        Voter: user.id,
+        CandidateID: selectedCandidate.id
+      });
 
-    if (response.data?.success) {  // Changed from response.payload to response.data
-      navigate('/vote-confirmation');
-    } else {
-      throw new Error(response.data?.message || 'Voting failed');
+
+
+      if (response.data.success) {
+        navigate('/dashboard');
+      } else {
+        throw new Error(response.data.message || 'Voting failed');
+      }
+    } catch (error) {
+      console.error('Error submitting vote:', error);
+      setError(error.message || 'Failed to submit vote');
+
+  console.log("Submitting vote:", {
+    Voter: user.id,
+    CandidateID: selectedCandidate.id
+  });
+
+  navigate('/dashboard');
+    } finally {
+      setIsLoading(false);
     }
-  } catch (error) {
-    console.error('Error submitting vote:', error);
-    setError(error.response?.data?.message || error.message || 'Failed to submit vote');
-  } finally {
-    setIsLoading(false);
-  }
-};
+  };
 
   return (
     <div className="p-6">
