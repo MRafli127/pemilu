@@ -18,9 +18,9 @@ const VotingProgress = () => {
     const fetchVoteData = async () => {
       try {
         const [res1, res2, res3] = await Promise.all([
-          api.get('/branch/1'),
-          api.get('/branch/2'),
-          api.get('/branch/3')
+          api.get('https://finpro-sbd-backend.vercel.app/branch/1'),
+          api.get('https://finpro-sbd-backend.vercel.app/branch/2'),
+          api.get('https://finpro-sbd-backend.vercel.app/branch/3')
         ]);
 
         const votes1 = res1.payload || [];

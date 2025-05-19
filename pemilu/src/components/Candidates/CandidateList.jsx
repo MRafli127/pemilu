@@ -12,7 +12,7 @@ const CandidateList = () => {
   useEffect(() => {
     const fetchCandidates = async () => {
       try {
-        const response = await api.get('/candidate');
+        const response = await api.get('https://finpro-sbd-backend.vercel.app/candidate/');
         console.log(response.payload)
 
         const mappedCandidates = response.payload.map((Candidate) => ({

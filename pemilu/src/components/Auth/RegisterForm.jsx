@@ -1,34 +1,95 @@
-// components/Auth/RegisterForm.jsx
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import Button from '../UI/Button';
 import InputField from '../UI/InputField';
 import { useAuth } from '../../context/AuthContext';
+import axios from 'axios';
 
 const RegisterForm = () => {
   const [formData, setFormData] = useState({
-    region: '',
-    nik: '',
+    region: 'branch1', // Default value for select
+    name: '',
+    age: '',
+    status: 'Kawin', // Default value for select
     email: '',
     password: '',
     confirmPassword: ''
   });
+
   const navigate = useNavigate();
   const { login } = useAuth();
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setFormData(prev => ({ 
+      ...prev, 
+      [name]: value || "" // Explicitly handle empty strings
+    }));
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    login({ email: formData.email });
-    navigate('/candidates');
+  const validateForm = () => {
+    const requiredFields = ['name', 'age', 'email', 'password', 'confirmPassword'];
+    const emptyFields = requiredFields.filter(field => !formData[field].trim());
+    
+    if (emptyFields.length > 0) {
+      alert(`Please fill in: ${emptyFields.join(', ')}`);
+      return false;
+    }
+
+    if (formData.password !== formData.confirmPassword) {
+      alert('Passwords do not match');
+      return false;
+    }
+
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+      alert('Please enter a valid email address');
+      return false;
+    }
+
+    if (formData.password.length < 8) {
+      alert('Password must be at least 8 characters');
+      return false;
+    }
+
+    return true;
   };
+
+  const handleSubmit = async (e) => {
+  e.preventDefault();
+
+  if (!validateForm()) return;
+
+  // Construct query parameters
+  const queryParams = new URLSearchParams({
+    email: formData.email,
+    password: formData.password,
+    name: formData.name,
+    age: formData.age,
+    status: formData.status,
+    region: formData.region,
+  }).toString();
+
+  const url = `https://finpro-sbd-backend.vercel.app/voter/register?${queryParams}`;
+
+  try {
+    const response = await axios.post(url); // No body needed, data is in URL
+    if (response.data.success) {
+      alert('Registration successful!');
+      navigate('/login');
+    } else {
+      alert(response.data.message || 'Registration failed');
+    }
+  } catch (error) {
+    console.error('Registration error:', error);
+    alert(
+      error.response?.data?.message ||
+      'Registration failed. Please try again.'
+    );
+  }
+};
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form onSubmit={handleSubmit} noValidate className="space-y-4">
       <div className="mb-4">
         <label className="block text-sm font-medium mb-1">Region</label>
         <select
@@ -38,21 +99,47 @@ const RegisterForm = () => {
           className="form-input"
           required
         >
-          <option value="">Select Occupation</option>
-          <option value="region1">Region 1</option>
-          <option value="region2">Region 2</option>
-          <option value="region3">Region 3</option>
+          <option value="branch1">Region 1</option>
+          <option value="branch2">Region 2</option>
+          <option value="branch3">Region 3</option>
         </select>
       </div>
-      
+
       <InputField
-        label="NIK"
-        name="nik"
-        placeholder="NIK"
-        value={formData.nik}
+        label="Name"
+        type="text"
+        name="name"
+        placeholder="Enter your name"
+        value={formData.name}
         onChange={handleChange}
         required
       />
+      
+      <InputField
+        label="Age"
+        type="number"
+        name="age"
+        placeholder="Enter your age"
+        value={formData.age}
+        onChange={handleChange}
+        min="17"
+        required
+      />
+      
+      <div className="mb-4">
+        <label className="block text-sm font-medium mb-1">Status</label>
+        <select
+          name="status"
+          value={formData.status}
+          onChange={handleChange}
+          className="form-input"
+          required
+        >
+          <option value="Kawin">Kawin</option>
+          <option value="Jomblo">Jomblo</option>
+          <option value="TNI">TNI</option>
+        </select>
+      </div>
       
       <InputField
         label="Email"
@@ -68,9 +155,10 @@ const RegisterForm = () => {
         label="Password"
         type="password"
         name="password"
-        placeholder="Text"
+        placeholder="Minimum 8 characters"
         value={formData.password}
         onChange={handleChange}
+        minLength="8"
         required
         icon={
           <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
@@ -84,9 +172,10 @@ const RegisterForm = () => {
         label="Confirm password"
         type="password"
         name="confirmPassword"
-        placeholder="Confirm password"
+        placeholder="Confirm your password"
         value={formData.confirmPassword}
         onChange={handleChange}
+        minLength="8"
         required
         icon={
           <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor">

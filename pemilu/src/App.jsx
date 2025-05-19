@@ -12,6 +12,8 @@ import VoteConfirmationPage from './pages/VoteConfirmationPage'; // import halam
 import { AuthProvider } from './context/AuthContext';
 import axios from 'axios'
 
+import ProtectedRoute from './components/Auth/ProtectedRoute';
+
 function App() {
   return (
     <AuthProvider>
@@ -20,12 +22,12 @@ function App() {
           <Route path="/" element={<StartPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
-          <Route path="/dashboard" element={<DashboardPage />} />
-          <Route path="/candidates" element={<CandidatesPage />} />
-          <Route path="/voting-progress" element={<VotingProgressPage />} />
-          <Route path="/voters-per-region" element={<VotersPerRegionPage />} />
-          <Route path="/countdown" element={<CountdownPage />} />
-          <Route path="/vote-confirmation" element={<VoteConfirmationPage />} /> {/* Route baru */}
+          <Route path="/dashboard" element={<ProtectedRoute><DashboardPage /> </ProtectedRoute>} />
+          <Route path="/candidates" element={<ProtectedRoute><CandidatesPage /> </ProtectedRoute>} />
+          <Route path="/voting-progress" element={<ProtectedRoute><VotingProgressPage /> </ProtectedRoute>} />
+          <Route path="/voters-per-region" element={<ProtectedRoute><VotersPerRegionPage /> </ProtectedRoute>} />
+          <Route path="/countdown" element={<ProtectedRoute><CountdownPage /> </ProtectedRoute>} />
+          <Route path="/vote-confirmation" element={<ProtectedRoute><VoteConfirmationPage /> </ProtectedRoute>} />
         </Routes>
       </Router>
     </AuthProvider>
