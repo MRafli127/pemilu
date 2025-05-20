@@ -4,14 +4,16 @@
   <img src="https://hackmd.io/_uploads/ryOHquF-gg.png" alt="Image" width="200">
 </p>
 
+
+
 Choose your president adalah sebuah website yang bertujuan untuk membantu sistem voting presiden supaya orang orang tidak usah repot pergi ke TPS untuk memilih capres. Terdapat 3 buah kantor cabang dan 1 kantor utama di mana setiap cabang mengumpulkan hasil vote yang nantinya total vote dihitung di kantor pusat. Pemilihan dilakukan dengan sistem eliminasi di setiap fase pemilihan. Tidak ada lagi alasan jadi golput karena TPS kejauhan dengan sistem ini.
+
 
 ### Features :star2: 
 - Login & Verifikasi Pengguna
 - Pemilihan Kandidat yang Mudah
 - Penghitungan Suara Otomatis
 - Countdown Hari Pemilihan
-- Dashboard Admin
 
 ## Installation Guide
 
@@ -86,7 +88,6 @@ pemilu/
 ```
 cd backend
 npm install
-
 npm run start
 ```
 - Stucture File Backend
@@ -123,10 +124,12 @@ backend/
 ![image](https://hackmd.io/_uploads/HyFBPOtbee.png)
 
 - #### ERD
-![ERD Finpro Draft - Page 1](https://hackmd.io/_uploads/HyrtbZqbxe.png)
+![ERD Finpro Draft - Page 1](https://hackmd.io/_uploads/S1l3DZq-ex.png)
+
 
 - #### FLOWCHART
-![Diagram SBD-Flowchart.drawio](https://hackmd.io/_uploads/BJEDzWc-ll.png)
+![image](https://hackmd.io/_uploads/rJl8-Z9Wex.png)
+
 
 ## Progress Report:
 ### Progress Report 1 (14 Mei 2025)
