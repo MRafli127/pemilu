@@ -13,50 +13,43 @@ const VotingProgress = () => {
 
   const shouldShowResults = isCountdownZero || user?.isadmin;
   console.log('isCountdownZero:', isCountdownZero);
-  console.log('user:', user.isadmin);
+  console.log('user.isadmin:', user?.isadmin);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // First fetch all candidates to get their details including image_url
+        // 1. Fetch candidates
         const candidatesResponse = await api.get('https://finpro-sbd-backend.vercel.app/candidate/');
         const allCandidates = candidatesResponse.payload || [];
-        
-        // Then fetch vote counts for each branch
-        const [res1, res2, res3] = await Promise.all([
-          api.get('https://finpro-sbd-backend.vercel.app/branch/1'),
-          api.get('https://finpro-sbd-backend.vercel.app/branch/2'),
-          api.get('https://finpro-sbd-backend.vercel.app/branch/3')
-        ]);
 
-        const votes1 = res1.payload || [];
-        const votes2 = res2.payload || [];
-        const votes3 = res3.payload || [];
-        const total = votes1.length + votes2.length + votes3.length;
+        // 2. Fetch all votes from /main/sync
+        const votesResponse = await api.post('https://finpro-sbd-backend.vercel.app/main/sync');
+        const allVotes = votesResponse.payload || [];
 
-        // Map candidates with their vote data using the image_url from the API
-        const updatedCandidates = allCandidates.map((candidate, index) => {
-          let votes = 0;
-          
-          // Match candidate with their branch votes based on order
-          switch(index) {
-            case 0: 
-              votes = votes1.length;
-              break;
-            case 1:
-              votes = votes2.length;
-              break;
-            case 2:
-              votes = votes3.length;
-              break;
+        // 3. Count votes per candidate
+        const voteCounts = {};
+        allVotes.forEach(vote => {
+          const id = vote.candidateid;
+          if (voteCounts[id]) {
+            voteCounts[id]++;
+          } else {
+            voteCounts[id] = 1;
           }
-          
+        });
+
+        const total = allVotes.length;
+
+        // 4. Map candidates with vote count and percentage
+        const updatedCandidates = allCandidates.map(candidate => {
+          const votes = voteCounts[candidate.candidateid] || 0;
+          const percentage = total > 0 ? Math.round((votes / total) * 100) : 0;
+
           return {
             id: candidate.candidateid,
             name: candidate.name,
             votes,
-            percentage: total > 0 ? Math.round((votes / total) * 100) : 0,
-            image: candidate.image_url || defaultCandidateImage, // Use API image_url or fallback
+            percentage,
+            image: candidate.image_url || defaultCandidateImage,
             description: candidate.description
           };
         });
@@ -73,7 +66,7 @@ const VotingProgress = () => {
 
     fetchData();
 
-    // Optional: Set up polling to refresh data periodically
+    // Optional: Polling every 10 seconds
     const interval = setInterval(fetchData, 10000);
     return () => clearInterval(interval);
   }, []);
@@ -92,44 +85,41 @@ const VotingProgress = () => {
 
       <div className="space-y-6 max-w-4xl mx-auto">
         {candidates.map(candidate => (
-        <div key={candidate.id} className="bg-blue-200 rounded-lg p-4 flex items-center">
-          <div className="w-28 h-28 overflow-hidden bg-blue-400 flex-shrink-0 rounded-lg">
-            <img 
-              src={candidate.image} 
-              alt={candidate.name} 
-              className="w-full h-full object-cover"
-              onError={(e) => {
-                e.target.src = defaultCandidateImage;
-              }}
-            />
+          <div key={candidate.id} className="bg-blue-200 rounded-lg p-4 flex items-center">
+            <div className="w-28 h-28 overflow-hidden bg-blue-400 flex-shrink-0 rounded-lg">
+              <img
+                src={candidate.image}
+                alt={candidate.name}
+                className="w-full h-full object-cover"
+                onError={(e) => {
+                  e.target.src = defaultCandidateImage;
+                }}
+              />
+            </div>
+
+            <div className="ml-4 flex-grow">
+              <div className="flex justify-between items-center mb-1">
+                <h3 className="font-bold text-xl text-blue-800">{candidate.name}</h3>
+                {shouldShowResults && (
+                  <span className="font-bold text-xl text-blue-800">{candidate.percentage}%</span>
+                )}
+              </div>
+
+              <div className="bg-gray-300 rounded-full h-4 overflow-hidden">
+                <div
+                  className="bg-white h-full rounded-full"
+                  style={{ width: !shouldShowResults ? '0%' : `${candidate.percentage}%` }}
+                ></div>
+              </div>
+
+              <div className="flex justify-between mt-1">
+                {shouldShowResults && (
+                  <p className="text-blue-800">{candidate.votes} Votes</p>
+                )}
+              </div>
+            </div>
           </div>
-
-          <div className="ml-4 flex-grow">
-            <div className="flex justify-between items-center mb-1">
-              <h3 className="font-bold text-xl text-blue-800">{candidate.name}</h3>
-              {shouldShowResults && (
-                <span className="font-bold text-xl text-blue-800">
-                  {candidate.percentage}%
-                </span>
-              )}
-            </div>
-
-            <div className="bg-gray-300 rounded-full h-4 overflow-hidden">
-              <div 
-                className="bg-white h-full rounded-full"
-                style={{ width: !shouldShowResults ? '0%' : `${candidate.percentage}%` }}
-              ></div>
-            </div>
-
-            <div className="flex justify-between mt-1">
-              {shouldShowResults && (
-                <p className="text-blue-800">{candidate.votes} Votes</p>
-              )}
-            </div>
-          </div>
-        </div>
-      ))}
-
+        ))}
       </div>
 
       <div className="text-center mt-12 text-blue-800 text-2xl font-bold">
