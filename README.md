@@ -23,7 +23,7 @@ git clone https://github.com/MRafli127/pemilu.git
 
 ### Frontend
 ```
-cd pemilu
+cd frontend
 npm install
 npm install react-router-dom
 npm run dev
