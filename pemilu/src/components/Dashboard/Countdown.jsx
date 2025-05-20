@@ -1,11 +1,18 @@
 // components/Dashboard/Countdown.jsx
-import { useEffect, useState, useContext } from 'react';
+import { useEffect, useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import axios from 'axios';
+import dayjs from 'dayjs';
+import utc from 'dayjs/plugin/utc';
+import timezone from 'dayjs/plugin/timezone';
+
+dayjs.extend(utc);
+dayjs.extend(timezone);<q></q>
 
 const Countdown = () => {
-    const { user } = useAuth();
+  const { user } = useAuth();
   const [endDate, setEndDate] = useState(null);
+  const [startDate, setStartDate] = useState(null);
   const [timeRemaining, setTimeRemaining] = useState({
     days: 0,
     hours: 0,
@@ -13,7 +20,16 @@ const Countdown = () => {
     seconds: 0,
   });
   const [customTime, setCustomTime] = useState("");
-  const [startDate, setStartDate] = useState(null);
+
+  const jakartaFormatter = new Intl.DateTimeFormat('en-GB', {
+    timeZone: 'Asia/Jakarta',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  });
 
   const fetchStartTime = async () => {
     try {
@@ -24,105 +40,83 @@ const Countdown = () => {
         console.error("Invalid start_date from server:", fetched);
         return;
       }
-      console.log("Fetched start_time:", startTime);
       setStartDate(startTime);
     } catch (err) {
       console.error("Error fetching start_time:", err);
     }
   };
 
-  // Fetch latest end_time from the backend
   const fetchEndTime = async () => {
-    
-  try {
-    // console.log("fetchEndTime() CALLED");
-    // console.log("endDate BEFORE fetch:", endDate);
-    const res = await axios.get('https://finpro-sbd-backend.vercel.app/countdown/read');
-    const fetched = res.data.payload.end_time;
-    
-    console.log("Fetched end_time:", fetched);
-
-    const latestEndTime = new Date(fetched); 
-    if (isNaN(latestEndTime.getTime())) {
-      console.error("Invalid end_date from server:", fetched);
-      return;
+    try {
+      const res = await axios.get('https://finpro-sbd-backend.vercel.app/countdown/read');
+      const fetched = res.data.payload.end_time;
+      const latestEndTime = new Date(fetched);
+      if (isNaN(latestEndTime.getTime())) {
+        console.error("Invalid end_date from server:", fetched);
+        return;
+      }
+      if (!endDate || latestEndTime.getTime() !== endDate.getTime()) {
+        setEndDate(latestEndTime);
+      }
+    } catch (err) {
+      console.error("Error fetching countdown:", err);
     }
-    
-    if (!endDate || latestEndTime.getTime() !== endDate.getTime()) {
-      console.log("Parsed and setting endDate:", latestEndTime);
-      setEndDate(latestEndTime);
-    }
-  } catch (err) {
-    console.error("Error fetching countdown:", err);
-  }
-};
+  };
 
-console.log("endDate:", endDate);
-
-// When submitting new time
+  // Inside handleSubmitTime
 const handleSubmitTime = async () => {
   if (!customTime) return;
   try {
-    // Convert datetime-local string to timestamp in milliseconds
-    const timestamp = new Date(customTime).getTime();
-console.log("Submitting timestamp:", timestamp);
-console.log("Original customTime:", customTime);
+    // Treat customTime as Asia/Jakarta local time
+    const jakartaTime = dayjs.tz(customTime, 'Asia/Jakarta');
 
+    console.log("Submitting Jakarta time:", jakartaTime.format());
+    
+    const res = await axios.post('https://finpro-sbd-backend.vercel.app/countdown/add', {
+      end_time: jakartaTime.toISOString(), // sends proper UTC timestamp
+    });
 
-    const res = await axios.post('https://finpro-sbd-backend.vercel.app/countdown/add', { end_time: customTime });
     const newEndDate = new Date(res.data.payload.end_time);
     setEndDate(newEndDate);
     setCustomTime("");
   } catch (err) {
     console.error("Error adding new end_time:", err);
-    console.error("Backend error response:", err.response?.data || err);
     alert("Failed to set new end time. Please check the format.");
   }
 };
 
-useEffect(() => {
-  fetchEndTime();
-  fetchStartTime();
-}, []);
+  useEffect(() => {
+    fetchEndTime();
+    fetchStartTime();
+  }, []);
 
-useEffect(() => {
-  //console.log("endDate changed, starting interval", endDate);
-  if (!endDate) return;
-
-  const interval = setInterval(() => {
-
-    console.log("NOW:", new Date().toISOString());
-    console.log("END DATE:", endDate.toISOString());
-    const now = new Date().getTime();
-    const distance = endDate.getTime() - now;
-
-    if (distance < 0) {
-      clearInterval(interval);
-      setTimeRemaining({ days: 0, hours: 0, minutes: 0, seconds: 0 });
-      return;
-    }
-
-    const days = Math.floor(distance / (1000 * 60 * 60 * 24));
-    const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-    const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-    const seconds = Math.floor((distance % (1000 * 60)) / 1000);
-
-    setTimeRemaining({ days, hours, minutes, seconds });
-
-    // console.log("Distance:", distance);
-    // console.log("Updating timeRemaining to:", { days, hours, minutes, seconds });
-  }, 1000);
-
-  return () => clearInterval(interval);
-}, [endDate]);
-
+  useEffect(() => {
+    if (!endDate) return;
+    const interval = setInterval(() => {
+      const now = new Date().getTime();
+      const distance = endDate.getTime() - now;
+      if (distance < 0) {
+        clearInterval(interval);
+        setTimeRemaining({ days: 0, hours: 0, minutes: 0, seconds: 0 });
+        return;
+      }
+      const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+      const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+      setTimeRemaining({ days, hours, minutes, seconds });
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [endDate]);
 
   return (
     <div className="p-8">
       <div className="flex justify-between items-center mb-12">
         <div>
           <p className="text-lg text-blue-800">Start Time:</p>
-          <p className="text-xl font-bold text-blue-800">{startDate ? startDate.toLocaleTimeString() + ' - ' + startDate.toLocaleDateString() : 'Loading...'}</p>
+          <p className="text-xl font-bold text-blue-800">
+            {startDate ? jakartaFormatter.format(startDate) : 'Loading...'}
+          </p>
         </div>
 
         {user.isadmin && (
@@ -160,7 +154,7 @@ useEffect(() => {
         <div>
           <p className="text-lg text-blue-800">End Time:</p>
           <p className="text-xl font-bold text-blue-800">
-            {endDate ? endDate.toLocaleTimeString() + ' - ' + endDate.toLocaleDateString() : 'Loading...'}
+            {endDate ? jakartaFormatter.format(endDate) : 'Loading...'}
           </p>
         </div>
       </div>
