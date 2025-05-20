@@ -123,10 +123,10 @@ backend/
 ![image](https://hackmd.io/_uploads/HyFBPOtbee.png)
 
 - #### ERD
-![image](https://hackmd.io/_uploads/r1ajKvtWge.png)
+![ERD Finpro Draft - Page 1](https://hackmd.io/_uploads/HyrtbZqbxe.png)
 
 - #### FLOWCHART
-
+![Diagram SBD-Flowchart.drawio](https://hackmd.io/_uploads/BJEDzWc-ll.png)
 
 ## Progress Report:
 ### Progress Report 1 (14 Mei 2025)
