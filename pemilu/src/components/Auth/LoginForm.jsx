@@ -1,10 +1,8 @@
-// components/Auth/LoginForm.jsx
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import Button from '../UI/Button';
 import InputField from '../UI/InputField';
 import { useAuth } from '../../context/AuthContext';
-
 import axios from 'axios';
 
 const LoginForm = () => {
@@ -20,36 +18,57 @@ const LoginForm = () => {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
- const handleSubmit = async (e) => {
+  const checkVoteStatus = async (userId) => {
+    try {
+      const response = await axios.get(
+        `https://finpro-sbd-backend.vercel.app/branch/checkvote/${userId}`
+      );
+      
+      if (response.data.payload?.hasVoted) {
+        navigate('/dashboard');
+        return true;
+      }
+      return false;
+    } catch (error) {
+      console.error('Error checking vote status:', error);
+      return false;
+    }
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     try {
       const response = await axios.post(
-      `https://finpro-sbd-backend.vercel.app/voter/login?email=${encodeURIComponent(formData.email)}&password=${encodeURIComponent(formData.password)}`
-    );
+        `https://finpro-sbd-backend.vercel.app/voter/login?email=${encodeURIComponent(formData.email)}&password=${encodeURIComponent(formData.password)}`
+      );
 
-    const { payload, token } = response.data;
+      const { payload, token } = response.data;
 
-    if (payload) {
-      login({
-        id: payload.voterid, 
-        name: payload.name,
-        email: payload.email,
-        isadmin: payload.isadmin,
-        region: payload.region,
-        token
-      });
+      if (payload) {
+        login({
+          id: payload.voterid, 
+          name: payload.name,
+          email: payload.email,
+          isadmin: payload.isadmin,
+          region: payload.region,
+          token
+        });
             
-      localStorage.setItem('user', JSON.stringify({
-        id: payload.voterid,
-        name: payload.name,
-        email: payload.email,
-        isadmin: payload.isadmin,
-        region: payload.region,
-        token
-    }));
+        localStorage.setItem('user', JSON.stringify({
+          id: payload.voterid,
+          name: payload.name,
+          email: payload.email,
+          isadmin: payload.isadmin,
+          region: payload.region,
+          token
+        }));
 
-        navigate('/candidates');
+        // Check vote status after successful login
+        const hasVoted = await checkVoteStatus(payload.voterid);
+        if (!hasVoted) {
+          navigate('/candidates');
+        }
       } else {
         console.log('Invalid email or password');
       }
@@ -58,9 +77,6 @@ const LoginForm = () => {
       console.log('An error occurred while logging in. Please try again.');
     }
   };
-
-
-
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
