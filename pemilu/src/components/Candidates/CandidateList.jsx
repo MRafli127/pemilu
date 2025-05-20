@@ -16,6 +16,8 @@ const CandidateList = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
 
+  console.log(user);
+
   useEffect(() => {
     const fetchCandidates = async () => {
       try {
@@ -46,69 +48,45 @@ const CandidateList = () => {
   };
 
 const handleVote = async () => {
-    if (!selectedCandidate.id) return;
+  if (!selectedCandidate.id) return;
 
-    setIsLoading(true);
-    setError(null);
+  setIsLoading(true);
+  setError(null);
 
-    try {
-      // Use the frontend index to determine the branch endpoint
-      switch(selectedCandidate.index) {
-        case 1: 
-        response = await api.post(
-        `https://finpro-sbd-backend.vercel.app/branch/add1`,
-        {
-          Voter: user.id,
-          CandidateID: selectedCandidate.id
-        }
-      );
-        break;
-        case 2: 
-        response = await api.post(
-        `https://finpro-sbd-backend.vercel.app/branch/add2`,
-        {
-          Voter: user.id,
-          CandidateID: selectedCandidate.id
-        }
-      );
-        break;
-        case 3: 
-        response = await api.post(
-        `https://finpro-sbd-backend.vercel.app/branch/add3`,
-        {
-          Voter: user.id,
-          CandidateID: selectedCandidate.id
-        }
-      );
-        break;
-        default: 
-      }
-        console.log("Submitting vote:", {
+  try {
+    const branchRegion = user.region;
+    const branchNumber = branchRegion.replace('branch', '');
+
+    if (!branchNumber) throw new Error("Invalid user region");
+
+    const response = await api.post(
+      `https://finpro-sbd-backend.vercel.app/branch/add${branchNumber}`,
+      {
         Voter: user.id,
         CandidateID: selectedCandidate.id
-      });
-
-
-
-      if (response.data.success) {
-        navigate('/dashboard');
-      } else {
-        throw new Error(response.data.message || 'Voting failed');
       }
-    } catch (error) {
-      console.error('Error submitting vote:', error);
-      setError(error.message || 'Failed to submit vote');
+    );
 
-  console.log("Submitting vote:", {
-    Voter: user.id,
-    CandidateID: selectedCandidate.id
-  });
+    // console.log("Response from voting API:", response.success);
 
-  navigate('/dashboard');
-    } finally {
-      setIsLoading(false);
+    console.log("Submitting vote:", {
+      Voter: user.id,
+      CandidateID: selectedCandidate.id
+    });
+
+    if (response.success) {
+      navigate('/dashboard');
+    } else {
+      throw new Error(response.data.message || 'Voting failed');
     }
-  };
+  } catch (error) {
+    console.error('Error submitting vote:', error);
+    setError(error.message || 'Failed to submit vote');
+  } finally {
+    setIsLoading(false);
+  }
+};
+
 
   return (
     <div className="p-6">
