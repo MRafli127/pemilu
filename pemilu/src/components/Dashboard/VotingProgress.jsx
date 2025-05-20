@@ -1,22 +1,20 @@
 import { useState, useEffect } from 'react';
-import api from '../../api/axios.js'; // corrected import
-import candidate1Image from '../../assets/NO1.jpg';
-import candidate2Image from '../../assets/NO2.jpg';
-import candidate3Image from '../../assets/NO3.jpeg';
+import api from '../../api/axios.js';
 
 const VotingProgress = () => {
-  const [candidates, setCandidates] = useState([
-    { id: 1, name: "CANDIDATE 1", votes: 0, percentage: 0, image: candidate1Image },
-    { id: 2, name: "CANDIDATE 2", votes: 0, percentage: 0, image: candidate2Image },
-    { id: 3, name: "CANDIDATE 3", votes: 0, percentage: 0, image: candidate3Image },
-  ]);
+  const [candidates, setCandidates] = useState([]);
   const [totalVotes, setTotalVotes] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    const fetchVoteData = async () => {
+    const fetchData = async () => {
       try {
+        // First fetch all candidates to get their details including image_url
+        const candidatesResponse = await api.get('https://finpro-sbd-backend.vercel.app/candidate/');
+        const allCandidates = candidatesResponse.payload || [];
+        
+        // Then fetch vote counts for each branch
         const [res1, res2, res3] = await Promise.all([
           api.get('https://finpro-sbd-backend.vercel.app/branch/1'),
           api.get('https://finpro-sbd-backend.vercel.app/branch/2'),
@@ -28,42 +26,47 @@ const VotingProgress = () => {
         const votes3 = res3.payload || [];
         const total = votes1.length + votes2.length + votes3.length;
 
-        setCandidates([
-          { 
-            id: 1, 
-            name: "CANDIDATE 1", 
-            votes: votes1.length, 
-            percentage: total > 0 ? Math.round((votes1.length / total) * 100) : 0,
-            image: candidate1Image 
-          },
-          { 
-            id: 2, 
-            name: "CANDIDATE 2", 
-            votes: votes2.length, 
-            percentage: total > 0 ? Math.round((votes2.length / total) * 100) : 0,
-            image: candidate2Image 
-          },
-          { 
-            id: 3, 
-            name: "CANDIDATE 3", 
-            votes: votes3.length, 
-            percentage: total > 0 ? Math.round((votes3.length / total) * 100) : 0,
-            image: candidate3Image 
+        // Map candidates with their vote data using the image_url from the API
+        const updatedCandidates = allCandidates.map((candidate, index) => {
+          let votes = 0;
+          
+          // Match candidate with their branch votes based on order
+          switch(index) {
+            case 0: 
+              votes = votes1.length;
+              break;
+            case 1:
+              votes = votes2.length;
+              break;
+            case 2:
+              votes = votes3.length;
+              break;
           }
-        ]);
+          
+          return {
+            id: candidate.candidateid,
+            name: candidate.name,
+            votes,
+            percentage: total > 0 ? Math.round((votes / total) * 100) : 0,
+            image: candidate.image_url || defaultCandidateImage, // Use API image_url or fallback
+            description: candidate.description
+          };
+        });
+
+        setCandidates(updatedCandidates);
         setTotalVotes(total);
         setLoading(false);
       } catch (err) {
-        console.error('Error fetching vote data:', err);
+        console.error('Error fetching data:', err);
         setError('Failed to load voting data');
         setLoading(false);
       }
     };
 
-    fetchVoteData();
+    fetchData();
 
     // Optional: Set up polling to refresh data periodically
-    const interval = setInterval(fetchVoteData, 10000);
+    const interval = setInterval(fetchData, 10000);
     return () => clearInterval(interval);
   }, []);
 
@@ -87,6 +90,9 @@ const VotingProgress = () => {
                 src={candidate.image} 
                 alt={candidate.name} 
                 className="w-full h-full object-cover"
+                onError={(e) => {
+                  e.target.src = defaultCandidateImage; // Fallback if image fails to load
+                }}
               />
             </div>
 
@@ -103,7 +109,9 @@ const VotingProgress = () => {
                 ></div>
               </div>
 
-              <p className="mt-1 text-blue-800">{candidate.votes} Votes</p>
+              <div className="flex justify-between mt-1">
+                <p className="text-blue-800">{candidate.votes} Votes</p>
+              </div>
             </div>
           </div>
         ))}
