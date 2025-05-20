@@ -18,15 +18,12 @@ const VotingProgress = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // 1. Fetch candidates
         const candidatesResponse = await api.get('https://finpro-sbd-backend.vercel.app/candidate/');
         const allCandidates = candidatesResponse.payload || [];
 
-        // 2. Fetch all votes from /main/sync
         const votesResponse = await api.post('https://finpro-sbd-backend.vercel.app/main/sync');
         const allVotes = votesResponse.payload || [];
 
-        // 3. Count votes per candidate
         const voteCounts = {};
         allVotes.forEach(vote => {
           const id = vote.candidateid;
@@ -92,38 +89,38 @@ const VotingProgress = () => {
                 alt={candidate.name}
                 className="w-full h-full object-cover"
                 onError={(e) => {
-                  e.target.src = defaultCandidateImage;
-                }}
-              />
-            </div>
+                    e.target.src = defaultCandidateImage;
+                  }}
+                  />
+                </div>
 
-            <div className="ml-4 flex-grow">
-              <div className="flex justify-between items-center mb-1">
-                <h3 className="font-bold text-xl text-blue-800">{candidate.name}</h3>
-                {shouldShowResults && (
-                  <span className="font-bold text-xl text-blue-800">{candidate.percentage}%</span>
-                )}
+                <div className="ml-4 flex-grow">
+                  <div className="flex justify-between items-center mb-1">
+                  <h3 className="font-bold text-xl text-blue-800">{candidate.name}</h3>
+                  <span className="font-bold text-xl text-blue-800">
+                    {shouldShowResults ? `${candidate.percentage}%` : '0%'}
+                  </span>
+                  </div>
+
+                  <div className="bg-gray-300 rounded-full h-4 overflow-hidden">
+                  <div
+                    className="bg-white h-full rounded-full"
+                    style={{ width: shouldShowResults ? `${candidate.percentage}%` : '0%' }}
+                  ></div>
+                  </div>
+
+                  <div className="flex justify-between mt-1">
+                  <p className="text-blue-800">
+                    {shouldShowResults ? `${candidate.votes} Votes` : '0 Votes'}
+                  </p>
+                  </div>
+                </div>
+                </div>
+              ))}
               </div>
 
-              <div className="bg-gray-300 rounded-full h-4 overflow-hidden">
-                <div
-                  className="bg-white h-full rounded-full"
-                  style={{ width: !shouldShowResults ? '0%' : `${candidate.percentage}%` }}
-                ></div>
-              </div>
-
-              <div className="flex justify-between mt-1">
-                {shouldShowResults && (
-                  <p className="text-blue-800">{candidate.votes} Votes</p>
-                )}
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
-
-      <div className="text-center mt-12 text-blue-800 text-2xl font-bold">
-        {/* Total: {totalVotes} Votes */}
+              <div className="text-center mt-12 text-blue-800 text-2xl font-bold">
+              Total: {totalVotes} Votes
       </div>
     </div>
   );

@@ -11,7 +11,6 @@ import { useCountdown } from '../../context/CountdownContext';
 dayjs.extend(utc);
 dayjs.extend(timezone);<q></q>
 
-import moment from 'moment';
 
 const Countdown = () => {
   const { user } = useAuth();

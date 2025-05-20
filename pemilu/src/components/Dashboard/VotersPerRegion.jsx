@@ -1,10 +1,20 @@
 import { useState, useEffect } from 'react';
 import api from '../../api/axios.js';
 
+import { useAuth } from '../../context/AuthContext';
+import { useCountdown } from '../../context/CountdownContext';
+
 const VotingProgress = () => {
   const [regionsData, setRegionsData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+
+  const { user } = useAuth();
+  const { isCountdownZero } = useCountdown();
+
+  const shouldShowResults = isCountdownZero || user?.isadmin;
+  console.log('isCountdownZero:', isCountdownZero);
+  console.log('user.isadmin:', user?.isadmin);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -76,7 +86,7 @@ const VotingProgress = () => {
         {regionsData.map(region => (
           <div key={region.regionName} className="bg-blue-100 rounded-lg p-6">
             <h3 className="text-2xl font-bold mb-4 text-blue-800">
-              {region.regionName} - Total Votes: {region.totalVotes}
+              {region.regionName} - Total Votes: {shouldShowResults ? region.totalVotes : 0}
             </h3>
 
             <div className="space-y-6">
@@ -97,18 +107,20 @@ const VotingProgress = () => {
                   <div className="ml-4 flex-grow">
                     <div className="flex justify-between items-center mb-1">
                       <h4 className="font-bold text-lg text-blue-800">{candidate.name}</h4>
-                      <span className="font-bold text-lg text-blue-800">{candidate.percentage}%</span>
+                      <span className="font-bold text-lg text-blue-800">
+                        {shouldShowResults ? candidate.percentage : 0}%
+                      </span>
                     </div>
 
                     <div className="bg-gray-300 rounded-full h-3 overflow-hidden">
-                      <div 
+                      {shouldShowResults && <div 
                         className="bg-blue-600 h-full rounded-full"
                         style={{ width: `${candidate.percentage}%` }}
-                      ></div>
+                      ></div> }
                     </div>
 
                     <div className="text-blue-800 text-sm mt-1">
-                      {candidate.votes} votes ({candidate.percentage}%)
+                      {shouldShowResults ? candidate.votes : 0} votes ({shouldShowResults ? candidate.percentage : 0}%)
                     </div>
                   </div>
                 </div>
