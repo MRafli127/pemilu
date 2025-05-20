@@ -145,13 +145,36 @@ const handleSubmitTime = async () => {
         )}
       </div>
 
-      <div className="flex items-center justify-center mt-12">
-        <h1 className="text-6xl font-bold text-blue-800">
-          {String(timeRemaining.days).padStart(2, '0')}:
-          {String(timeRemaining.hours).padStart(2, '0')}:
-          {String(timeRemaining.minutes).padStart(2, '0')}:
-          {String(timeRemaining.seconds).padStart(2, '0')}
-        </h1>
+      <div className="flex flex-col items-center justify-center mt-12">
+        <div className="flex gap-4">
+          <div className="flex flex-col items-center">
+            <span className="bg-blue-100 text-blue-800 text-6xl font-bold px-6 py-2 rounded-lg shadow">
+              {String(timeRemaining.days).padStart(2, '0')}
+            </span>
+            <span className="mt-2 text-blue-700 font-semibold text-lg">Days</span>
+          </div>
+          <span className="text-6xl font-bold text-blue-800 flex items-end pb-4">:</span>
+          <div className="flex flex-col items-center">
+            <span className="bg-blue-100 text-blue-800 text-6xl font-bold px-6 py-2 rounded-lg shadow">
+              {String(timeRemaining.hours).padStart(2, '0')}
+            </span>
+            <span className="mt-2 text-blue-700 font-semibold text-lg">Hours</span>
+          </div>
+          <span className="text-6xl font-bold text-blue-800 flex items-end pb-4">:</span>
+          <div className="flex flex-col items-center">
+            <span className="bg-blue-100 text-blue-800 text-6xl font-bold px-6 py-2 rounded-lg shadow">
+              {String(timeRemaining.minutes).padStart(2, '0')}
+            </span>
+            <span className="mt-2 text-blue-700 font-semibold text-lg">Minutes</span>
+          </div>
+          <span className="text-6xl font-bold text-blue-800 flex items-end pb-4">:</span>
+          <div className="flex flex-col items-center">
+            <span className="bg-blue-100 text-blue-800 text-6xl font-bold px-6 py-2 rounded-lg shadow">
+              {String(timeRemaining.seconds).padStart(2, '0')}
+            </span>
+            <span className="mt-2 text-blue-700 font-semibold text-lg">Seconds</span>
+          </div>
+        </div>
       </div>
 
       <div className="flex justify-between items-center mt-12">
