@@ -5,7 +5,8 @@ const VoteConfirmation = () => {
   const navigate = useNavigate();
 
   const handleContinue = () => {
-    navigate('/voting-progress'); // Ganti sesuai rute tujuan setelah vote
+    //navigate('/voting-progress'); // Ganti sesuai rute tujuan setelah vote
+    navigate('/countdown'); 
   };
 
   return (

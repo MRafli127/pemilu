@@ -1,11 +1,19 @@
 import { useState, useEffect } from 'react';
 import api from '../../api/axios.js';
+import { useAuth } from '../../context/AuthContext';
+import { useCountdown } from '../../context/CountdownContext';
 
 const VotingProgress = () => {
   const [candidates, setCandidates] = useState([]);
   const [totalVotes, setTotalVotes] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const { user } = useAuth();
+  const { isCountdownZero } = useCountdown();
+
+  const shouldShowResults = isCountdownZero || user?.isadmin;
+  console.log('isCountdownZero:', isCountdownZero);
+  console.log('user:', user.isadmin);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -84,37 +92,44 @@ const VotingProgress = () => {
 
       <div className="space-y-6 max-w-4xl mx-auto">
         {candidates.map(candidate => (
-          <div key={candidate.id} className="bg-blue-200 rounded-lg p-4 flex items-center">
-            <div className="w-28 h-28 overflow-hidden bg-blue-400 flex-shrink-0 rounded-lg">
-              <img 
-                src={candidate.image} 
-                alt={candidate.name} 
-                className="w-full h-full object-cover"
-                onError={(e) => {
-                  e.target.src = defaultCandidateImage; // Fallback if image fails to load
-                }}
-              />
+        <div key={candidate.id} className="bg-blue-200 rounded-lg p-4 flex items-center">
+          <div className="w-28 h-28 overflow-hidden bg-blue-400 flex-shrink-0 rounded-lg">
+            <img 
+              src={candidate.image} 
+              alt={candidate.name} 
+              className="w-full h-full object-cover"
+              onError={(e) => {
+                e.target.src = defaultCandidateImage;
+              }}
+            />
+          </div>
+
+          <div className="ml-4 flex-grow">
+            <div className="flex justify-between items-center mb-1">
+              <h3 className="font-bold text-xl text-blue-800">{candidate.name}</h3>
+              {shouldShowResults && (
+                <span className="font-bold text-xl text-blue-800">
+                  {candidate.percentage}%
+                </span>
+              )}
             </div>
 
-            <div className="ml-4 flex-grow">
-              <div className="flex justify-between items-center mb-1">
-                <h3 className="font-bold text-xl text-blue-800">{candidate.name}</h3>
-                <span className="font-bold text-xl text-blue-800">{candidate.percentage}%</span>
-              </div>
+            <div className="bg-gray-300 rounded-full h-4 overflow-hidden">
+              <div 
+                className="bg-white h-full rounded-full"
+                style={{ width: !shouldShowResults ? '0%' : `${candidate.percentage}%` }}
+              ></div>
+            </div>
 
-              <div className="bg-gray-300 rounded-full h-4 overflow-hidden">
-                <div 
-                  className="bg-white h-full rounded-full"
-                  style={{ width: `${candidate.percentage}%` }}
-                ></div>
-              </div>
-
-              <div className="flex justify-between mt-1">
+            <div className="flex justify-between mt-1">
+              {shouldShowResults && (
                 <p className="text-blue-800">{candidate.votes} Votes</p>
-              </div>
+              )}
             </div>
           </div>
-        ))}
+        </div>
+      ))}
+
       </div>
 
       <div className="text-center mt-12 text-blue-800 text-2xl font-bold">

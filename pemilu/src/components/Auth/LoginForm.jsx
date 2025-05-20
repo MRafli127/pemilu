@@ -25,7 +25,8 @@ const LoginForm = () => {
       );
       
       if (response.data.payload?.hasVoted) {
-        navigate('/dashboard');
+        //navigate('/dashboard');
+        navigate('/countdown');
         return true;
       }
       return false;
