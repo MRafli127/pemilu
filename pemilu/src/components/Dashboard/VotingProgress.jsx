@@ -118,7 +118,7 @@ const VotingProgress = () => {
       </div>
 
       <div className="text-center mt-12 text-blue-800 text-2xl font-bold">
-        Total: {totalVotes} Votes
+        {/* Total: {totalVotes} Votes */}
       </div>
     </div>
   );
