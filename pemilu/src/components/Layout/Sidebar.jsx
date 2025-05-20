@@ -1,13 +1,23 @@
+import { useEffect, useState } from 'react';
 import { NavLink } from 'react-router-dom';
 
 const Sidebar = ({ currentTime, formatTime, formatDate, handleLogout }) => {
+  const [isDisabled, setIsDisabled] = useState(true);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setIsDisabled(false), 2000);
+    return () => clearTimeout(timer);
+  }, []);
+
   return (
     <div className="w-64 bg-blue-800 text-white flex flex-col justify-between">
-      <div>
+      {/* Apply disabled style conditionally */}
+      <div className={`${isDisabled ? 'pointer-events-none opacity-50' : ''}`}>
         <div className="p-6">
           <h2 className="text-2xl font-bold mb-1">Choose Your</h2>
           <h2 className="text-2xl font-bold mb-8">President!</h2>
         </div>
+
         <nav>
           <NavLink 
             to="/voting-progress" 
@@ -42,7 +52,6 @@ const Sidebar = ({ currentTime, formatTime, formatDate, handleLogout }) => {
         </nav>
       </div>
 
-      {/* Server Time dan Logout button di bawah */}
       <div className="p-6 border-t border-blue-700 flex flex-col items-start gap-4">
         <div className="text-white font-bold text-xl">
           Server Time:<br />

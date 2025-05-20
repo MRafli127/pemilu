@@ -16,6 +16,8 @@ const CandidateList = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
 
+  console.log(user);
+
   useEffect(() => {
     const fetchCandidates = async () => {
       try {
@@ -45,69 +47,46 @@ const CandidateList = () => {
     setError(null);
   };
 
-  const handleVote = async () => {
+const handleVote = async () => {
   if (!selectedCandidate.id) return;
 
   setIsLoading(true);
   setError(null);
 
   try {
-    let response;
-    const formData = new URLSearchParams();
-    formData.append('Voter', user.id);
-    formData.append('CandidateID', selectedCandidate.id);
+    const branchRegion = user.region;
+    const branchNumber = branchRegion.replace('branch', '');
 
-    // Use the frontend index to determine the branch endpoint
-    switch(selectedCandidate.index) {
-      case 1: 
-        response = await api.post(
-          `https://finpro-sbd-backend.vercel.app/branch/add1`,
-          formData.toString(),
-          {
-            headers: {
-              'Content-Type': 'application/x-www-form-urlencoded'
-            }
-          }
-        );
-        break;
-      case 2: 
-        response = await api.post(
-          `https://finpro-sbd-backend.vercel.app/branch/add2`,
-          formData.toString(),
-          {
-            headers: {
-              'Content-Type': 'application/x-www-form-urlencoded'
-            }
-          }
-        );
-        break;
-      case 3: 
-        response = await api.post(
-          `https://finpro-sbd-backend.vercel.app/branch/add3`,
-          formData.toString(),
-          {
-            headers: {
-              'Content-Type': 'application/x-www-form-urlencoded'
-            }
-          }
-        );
-        break;
-      default:
-        throw new Error('Invalid candidate index');
-    }
+    if (!branchNumber) throw new Error("Invalid user region");
 
-    if (response.data?.success) {  // Changed from response.payload to response.data
-      navigate('/vote-confirmation');
+    const response = await api.post(
+      `https://finpro-sbd-backend.vercel.app/branch/add${branchNumber}`,
+      {
+        Voter: user.id,
+        CandidateID: selectedCandidate.id
+      }
+    );
+
+    // console.log("Response from voting API:", response.success);
+
+    console.log("Submitting vote:", {
+      Voter: user.id,
+      CandidateID: selectedCandidate.id
+    });
+
+    if (response.success) {
+      navigate('/dashboard');
     } else {
-      throw new Error(response.data?.message || 'Voting failed');
+      throw new Error(response.data.message || 'Voting failed');
     }
   } catch (error) {
     console.error('Error submitting vote:', error);
-    setError(error.response?.data?.message || error.message || 'Failed to submit vote');
+    setError(error.message || 'Failed to submit vote');
   } finally {
     setIsLoading(false);
   }
 };
+
 
   return (
     <div className="p-6">

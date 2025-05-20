@@ -1,69 +1,70 @@
 import { useState, useEffect } from 'react';
-import api from '../../api/axios.js'; // corrected import
-import candidate1Image from '../../assets/NO1.jpg';
-import candidate2Image from '../../assets/NO2.jpg';
-import candidate3Image from '../../assets/NO3.jpeg';
+import api from '../../api/axios.js';
+import { useAuth } from '../../context/AuthContext';
+import { useCountdown } from '../../context/CountdownContext';
 
 const VotingProgress = () => {
-  const [candidates, setCandidates] = useState([
-    { id: 1, name: "CANDIDATE 1", votes: 0, percentage: 0, image: candidate1Image },
-    { id: 2, name: "CANDIDATE 2", votes: 0, percentage: 0, image: candidate2Image },
-    { id: 3, name: "CANDIDATE 3", votes: 0, percentage: 0, image: candidate3Image },
-  ]);
+  const [candidates, setCandidates] = useState([]);
   const [totalVotes, setTotalVotes] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const { user } = useAuth();
+  const { isCountdownZero } = useCountdown();
+
+  const shouldShowResults = isCountdownZero || user?.isadmin;
+  console.log('isCountdownZero:', isCountdownZero);
+  console.log('user.isadmin:', user?.isadmin);
 
   useEffect(() => {
-    const fetchVoteData = async () => {
+    const fetchData = async () => {
       try {
-        const [res1, res2, res3] = await Promise.all([
-          api.get('https://finpro-sbd-backend.vercel.app/branch/1'),
-          api.get('https://finpro-sbd-backend.vercel.app/branch/2'),
-          api.get('https://finpro-sbd-backend.vercel.app/branch/3')
-        ]);
+        const candidatesResponse = await api.get('https://finpro-sbd-backend.vercel.app/candidate/');
+        const allCandidates = candidatesResponse.payload || [];
 
-        const votes1 = res1.payload || [];
-        const votes2 = res2.payload || [];
-        const votes3 = res3.payload || [];
-        const total = votes1.length + votes2.length + votes3.length;
+        const votesResponse = await api.post('https://finpro-sbd-backend.vercel.app/main/sync');
+        const allVotes = votesResponse.payload || [];
 
-        setCandidates([
-          { 
-            id: 1, 
-            name: "CANDIDATE 1", 
-            votes: votes1.length, 
-            percentage: total > 0 ? Math.round((votes1.length / total) * 100) : 0,
-            image: candidate1Image 
-          },
-          { 
-            id: 2, 
-            name: "CANDIDATE 2", 
-            votes: votes2.length, 
-            percentage: total > 0 ? Math.round((votes2.length / total) * 100) : 0,
-            image: candidate2Image 
-          },
-          { 
-            id: 3, 
-            name: "CANDIDATE 3", 
-            votes: votes3.length, 
-            percentage: total > 0 ? Math.round((votes3.length / total) * 100) : 0,
-            image: candidate3Image 
+        const voteCounts = {};
+        allVotes.forEach(vote => {
+          const id = vote.candidateid;
+          if (voteCounts[id]) {
+            voteCounts[id]++;
+          } else {
+            voteCounts[id] = 1;
           }
-        ]);
+        });
+
+        const total = allVotes.length;
+
+        // 4. Map candidates with vote count and percentage
+        const updatedCandidates = allCandidates.map(candidate => {
+          const votes = voteCounts[candidate.candidateid] || 0;
+          const percentage = total > 0 ? Math.round((votes / total) * 100) : 0;
+
+          return {
+            id: candidate.candidateid,
+            name: candidate.name,
+            votes,
+            percentage,
+            image: candidate.image_url || defaultCandidateImage,
+            description: candidate.description
+          };
+        });
+
+        setCandidates(updatedCandidates);
         setTotalVotes(total);
         setLoading(false);
       } catch (err) {
-        console.error('Error fetching vote data:', err);
+        console.error('Error fetching data:', err);
         setError('Failed to load voting data');
         setLoading(false);
       }
     };
 
-    fetchVoteData();
+    fetchData();
 
-    // Optional: Set up polling to refresh data periodically
-    const interval = setInterval(fetchVoteData, 10000);
+    // Optional: Polling every 10 seconds
+    const interval = setInterval(fetchData, 10000);
     return () => clearInterval(interval);
   }, []);
 
@@ -83,34 +84,43 @@ const VotingProgress = () => {
         {candidates.map(candidate => (
           <div key={candidate.id} className="bg-blue-200 rounded-lg p-4 flex items-center">
             <div className="w-28 h-28 overflow-hidden bg-blue-400 flex-shrink-0 rounded-lg">
-              <img 
-                src={candidate.image} 
-                alt={candidate.name} 
+              <img
+                src={candidate.image}
+                alt={candidate.name}
                 className="w-full h-full object-cover"
-              />
-            </div>
+                onError={(e) => {
+                    e.target.src = defaultCandidateImage;
+                  }}
+                  />
+                </div>
 
-            <div className="ml-4 flex-grow">
-              <div className="flex justify-between items-center mb-1">
-                <h3 className="font-bold text-xl text-blue-800">{candidate.name}</h3>
-                <span className="font-bold text-xl text-blue-800">{candidate.percentage}%</span>
+                <div className="ml-4 flex-grow">
+                  <div className="flex justify-between items-center mb-1">
+                  <h3 className="font-bold text-xl text-blue-800">{candidate.name}</h3>
+                  <span className="font-bold text-xl text-blue-800">
+                    {shouldShowResults ? `${candidate.percentage}%` : '0%'}
+                  </span>
+                  </div>
+
+                  <div className="bg-gray-300 rounded-full h-4 overflow-hidden">
+                  <div
+                    className="bg-white h-full rounded-full"
+                    style={{ width: shouldShowResults ? `${candidate.percentage}%` : '0%' }}
+                  ></div>
+                  </div>
+
+                  <div className="flex justify-between mt-1">
+                  <p className="text-blue-800">
+                    {shouldShowResults ? `${candidate.votes} Votes` : '0 Votes'}
+                  </p>
+                  </div>
+                </div>
+                </div>
+              ))}
               </div>
 
-              <div className="bg-gray-300 rounded-full h-4 overflow-hidden">
-                <div 
-                  className="bg-white h-full rounded-full"
-                  style={{ width: `${candidate.percentage}%` }}
-                ></div>
-              </div>
-
-              <p className="mt-1 text-blue-800">{candidate.votes} Votes</p>
-            </div>
-          </div>
-        ))}
-      </div>
-
-      <div className="text-center mt-12 text-blue-800 text-2xl font-bold">
-        Total: {totalVotes} Votes
+              <div className="text-center mt-12 text-blue-800 text-2xl font-bold">
+              Total: {totalVotes} Votes
       </div>
     </div>
   );
